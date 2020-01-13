@@ -210,7 +210,8 @@ def moveMonsterStart(monster_x, monster_y):
     boardList = boardList[:positionM] + 'o' + boardList[positionM+1:]
     boardList = boardList[:movementLocation] + 'M' + boardList[movementLocation+1:]
 
-
+# Moves the human piece to the new position on the digital board based on 
+# the change in position on the physical board
 def moveHuman(human_x, human_y):
     movementLocation = ((human_y*12)+human_x)*2
     positionH = findPlayer("H")
@@ -307,7 +308,7 @@ def translatePosition(theName, coords):
             count += 1
         return new_x, new_y
 
-
+#turns webcam on for calibration of the pieces
 bd.setup_video()
 
 monster_start = 0
@@ -347,16 +348,23 @@ monsterMoves = monsterPath[:5]
 while(turn != 0):
 
     colorTheBoard()
+    
+    # Checks if the turn is the humans turn, and waits for the player to physically move the piece
+    # when the player types Q into the console it continues and moves the human piece on the board digitally
     if(turn % 2 == 0):
         print("It is the humans turn.")
         my_list = ["human"]
+        
+        # Uses object detection to find the current pixel position of the bounding box where the human piece is
         the_dict = bd.send_coords(my_list)
         k, v = next(iter(the_dict.items()))
         newX, newY = translatePosition(k, v)
         previous_x, previous_y = newX, newY
         moveHuman(previous_x, previous_y)
+        
         prompt = input("Press Q to end turn:")
-
+        
+        # Moves the human piece based on the new detected position
         my_list = ["human", "treasure"]
         the_dict = bd.send_coords(my_list)
         for k, v in the_dict.items():
@@ -375,6 +383,8 @@ while(turn != 0):
         newX, newY = translatePosition(k, v)
         previous_x, previous_y = newX, newY
         moveHuman(previous_x, previous_y)
+        
+        # Checks if the player has found
         if(hasTreasure is True and foundTreasure is True):
             print("YOU HAVE THE TREASURE, GET OUT")
             theList = string_to_list(boardList)
@@ -384,6 +394,7 @@ while(turn != 0):
             print("YOU WON!!!!")
             break
         turn -= 1
+    # 
     else:
         print("It is the monsters turn.")
         humanSneak = False
