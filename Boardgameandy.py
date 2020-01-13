@@ -5,6 +5,8 @@ from colorama import init, Fore
 from termcolor import colored
 init()
 
+# Cell and Astar Classes were used from the website:
+# https://www.laurentluce.com/posts/solving-mazes-using-python-simple-recursivity-and-a-search/
 
 class Cell(object):
     def __init__(self, x, y, reachable):
@@ -145,13 +147,14 @@ class AStar(object):
                         heapq.heappush(self.opened, (adj_cell.f, adj_cell))
 
 
+# finds the exact cardinal location of a given player piece in the string itself
 def get_location(rows, input_element):
     for i, row in enumerate(rows):
         for j, item in enumerate(row):
             if item == input_element:
                 return j, i
 
-
+# finds all available wall spaces and saves their cardinal coordinates in a list
 def create_walls(rows, input_element):
     wall_list = []
     for i, row in enumerate(rows):
@@ -160,11 +163,12 @@ def create_walls(rows, input_element):
                 wall_list.append((j, i))
     return wall_list
 
-
+# converts the board string into a manipulative list
 def string_to_list(input_string):
     return [x.split('-') for x in input_string.split('\n')]
 
 
+# converts a board list back into the original string
 def list_to_string(input_list):
     return '\n'.join(['-'.join(x) for x in input_list])
 
@@ -178,12 +182,14 @@ exit_loc_x = 200
 exit_loc_y = 200
 
 
+# Uses the cardinal coordinate location of the character and returns its exact index in the string
 def findPlayer(char):
     x, y = get_location(theList, char)
     playerIndex = ((y*12)+x)*2
     return playerIndex
 
 
+# Moves the monster piece to the desired location that the Astar algorithm decided to move towards after 6 spaces
 def moveMonster(moveList):
     global boardList
 
@@ -194,7 +200,8 @@ def moveMonster(moveList):
     boardList = boardList[:positionM] + 'o' + boardList[positionM+1:]
     boardList = boardList[:movementLocation] + 'M' + boardList[movementLocation+1:]
 
-
+# Initializes the monster pieces position on the digital board 
+# based on the current location of the piece on the physical board at the start of the game.
 def moveMonsterStart(monster_x, monster_y):
     global boardList
     movementLocation = ((monster_y*12)+monster_x)*2
@@ -226,9 +233,12 @@ x-o-o-x-o-x-x-o-x-o-o-x
 x-o-o-o-o-o-o-o-o-o-M-x
 x-x-x-x-x-x-x-x-x-x-x-x"""
 
+# Converts the above boardList into a string in-order to be further manipulated in the program
 theList = string_to_list(boardList)
 
 
+
+# Picks a randomly available space given the current board-state, and replaces that space with an 'E' denoting the boards Exit.
 def generate_exit(rows, input_element):
     global boardList
     space_list = []
@@ -241,34 +251,8 @@ def generate_exit(rows, input_element):
     boardList = boardList[:movementLocation] + 'E' + boardList[movementLocation+1:]
     return(exit_loc_x, exit_loc_y)
 
-
-def cardinalWall():
-    distance = 0
-    findXCount = 0
-    listOfSteps = []
-    positionH = findPlayer("H")
-    emptyChar = ''
-    while findXCount != 4:
-        if findXCount == 0:
-            possibleBorder = positionH-verticalStep*distance
-        if findXCount == 1:
-            possibleBorder = positionH+verticalStep*distance
-        if findXCount == 2:
-            possibleBorder = positionH-horizontalStep*distance
-        if findXCount == 3:
-            possibleBorder = positionH+horizontalStep*distance
-        emptyChar = boardList[possibleBorder]
-        if(emptyChar == 'x'):
-            if (distance > 6):
-                distance = 7
-            listOfSteps.append(distance-1)
-            findXCount += 1
-            distance = 0
-        else:
-            distance += 1
-    return(listOfSteps)
-
-
+# created a temporary string in order to be manipulated to change each wall space to blue and to remove the '-' visually.
+# The human and monster pieces are color changed as well respectively to yellow and blue on red.
 def colorTheBoard():
     colorBoard = boardList
     colorBoard = colorBoard.replace('x', colored('x', 'blue', 'on_blue'))
@@ -278,6 +262,10 @@ def colorTheBoard():
     print(colorBoard)
 
 
+    
+# function that converts the X and Y pixel positions on the webcam image into cardinal coordinates.
+# Ex. (365, 82) would be converted to (2, 1)
+# number conversation is based on a calibrated set of numbers available as monster_range_x and monster_range_y
 def translatePosition(theName, coords):
     x_position, y_position = coords
     new_x = 0
