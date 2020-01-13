@@ -367,9 +367,13 @@ while(turn != 0):
         # Moves the human piece based on the new detected position
         my_list = ["human", "treasure"]
         the_dict = bd.send_coords(my_list)
+        
         for k, v in the_dict.items():
+            # if human piece is detected, return the new X, Y coordinates
             if(k == "human"):
                 newX, newY = translatePosition(k, v)
+                
+            # treasure piece is detected, sets the treasure boolean to true
             if(k == "treasure"):
                 hasTreasure = True
 
@@ -384,17 +388,20 @@ while(turn != 0):
         previous_x, previous_y = newX, newY
         moveHuman(previous_x, previous_y)
         
-        # Checks if the player has found
+        # Checks if the player has found the treasure
+        # if they have, sets the foundTreasure boolean to false so that the if statement is not triggered again
         if(hasTreasure is True and foundTreasure is True):
             print("YOU HAVE THE TREASURE, GET OUT")
             theList = string_to_list(boardList)
             exit_loc_x, exit_loc_y = generate_exit(theList, 'o')
             foundTreasure = False
+        # Checks if the player's coordinates are the same as the exit coordinates,
+        # which can only be possible if the treasure has been found
         if(previous_x == exit_loc_x and previous_y == exit_loc_y):
             print("YOU WON!!!!")
             break
         turn -= 1
-    # 
+    # Moves the monster digitally on the board if it is the monsters turn
     else:
         print("It is the monsters turn.")
         humanSneak = False
@@ -406,13 +413,19 @@ while(turn != 0):
         theStar.cells = []
 
         theList = string_to_list(boardList)
+        # reinitializes human and monster position if the human did not sneak
         if(distance_moved > 2):
             start = get_location(theList, "M")
             end = get_location(theList, "H")
+            
+        # sets the sneak boolean to true if human piece moves 2 spaces or less
         if(distance_moved <= 2):
             humanSneak = True
         theStar.init_grid(12, 12, walls, start, end)
         monsterPath = theStar.solve()
+        
+        #  Forces the monster piece to continue following its path as long as the human piece is sneaking
+        # by giving the monster piece the next five spaces in the full Astar path until it gets to the end
         if(humanSneak is True):
             monsterMoves = monsterPath[monster_start:monster_end]
             if(monster_end > len(monsterPath)):
@@ -424,6 +437,7 @@ while(turn != 0):
         monster_start += 5
         monster_end += 5
 
+        # Loss condition if the monster player kills the human player
         if('H' not in boardList):
             colorTheBoard()
             print("YOU LOST, MONSTER CAPTURED YOU")
